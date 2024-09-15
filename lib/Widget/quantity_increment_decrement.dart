@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 
-class NoOfQuantity extends StatelessWidget {
+class QuantityIncrementDecrement extends StatelessWidget {
   final int currentNumber;
   final Function() onAdd;
-  final Function() onRemove;
-  const NoOfQuantity({
+  final Function() onRemov;
+  const QuantityIncrementDecrement({
     super.key,
     required this.currentNumber,
     required this.onAdd,
-    required this.onRemove,
+    required this.onRemov,
   });
 
   @override
@@ -27,7 +27,7 @@ class NoOfQuantity extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           IconButton(
-            onPressed: onRemove,
+            onPressed: onRemov,
             icon: const Icon(Iconsax.minus),
           ),
           const SizedBox(width: 10),
@@ -40,7 +40,7 @@ class NoOfQuantity extends StatelessWidget {
           ),
           const SizedBox(width: 10),
           IconButton(
-                       onPressed: onAdd,
+            onPressed: onAdd,
             icon: const Icon(Iconsax.add),
           ),
         ],
@@ -48,4 +48,3 @@ class NoOfQuantity extends StatelessWidget {
     );
   }
 }
-

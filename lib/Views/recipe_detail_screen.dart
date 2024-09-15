@@ -1,119 +1,63 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_app/Provider/favorite_provider.dart';
+import 'package:flutter_complete_app/Provider/quantity.dart';
+import 'package:flutter_complete_app/Utils/constants.dart';
+import 'package:flutter_complete_app/Widget/my_icon_button.dart';
+import 'package:flutter_complete_app/Widget/quantity_increment_decrement.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:provider/provider.dart';
 
-import '../Provider/favorite_provider.dart';
-import '../Provider/quantity.dart';
-import '../Utils/constants.dart';
-import '../widgets/food_counter.dart';
-import '../widgets/my_icon_button.dart';
-
-class RecipeScreen extends StatefulWidget {
+class RecipeDetailScreen extends StatefulWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
-
-  const RecipeScreen({
-    super.key,
-    required this.documentSnapshot,
-  });
+  const RecipeDetailScreen({super.key, required this.documentSnapshot});
 
   @override
-  State<RecipeScreen> createState() => _RecipeScreenState();
+  State<RecipeDetailScreen> createState() => _RecipeDetailScreenState();
 }
 
-class _RecipeScreenState extends State<RecipeScreen> {
+class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
   @override
-void initState() {
-  super.initState();
-  // Initialize base ingredient amounts in the provider
-  List<double> baseAmounts = widget.documentSnapshot["ingredientsAmount"]
-      .map<double>((amount) => double.parse(amount.toString()))
-      .toList();
-  Provider.of<RecipeProvider>(context, listen: false)
-      .setBaseIngredientAmounts(baseAmounts);
-}
+  void initState() {
+    // initialize base ingredient amounts in the provider
+    List<double> baseAmounts = widget.documentSnapshot['ingredientsAmount']
+        .map<double>((amount) => double.parse(amount.toString()))
+        .toList();
+    Provider.of<QuantityProvider>(context, listen: false)
+        .setBaseIngredientAmounts(baseAmounts);
+    super.initState();
+  }
 
+// we have a Spelling mistake that's what we face a error, be carefully, all items name must be same in firebase
   @override
   Widget build(BuildContext context) {
-    final recipeProvider = Provider.of<RecipeProvider>(context);
     final provider = FavoriteProvider.of(context);
-
+    final quantityProvider = Provider.of<QuantityProvider>(context);
     return Scaffold(
-       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        onPressed: () {},
-        label: Row(
-          children: [
-            ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: kprimaryColor,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 100,
-                  vertical: 10,
-                ),
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                "Start Cooking",
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-            const SizedBox(width: 10),
-            IconButton(
-              onPressed: () {
-                provider.toggleFavorite(widget.documentSnapshot);
-              },
-              style: IconButton.styleFrom(
-                shape: CircleBorder(
-                  side: BorderSide(
-                    color: Colors.grey.shade300,
-                    width: 2,
-                  ),
-                ),
-              ),
-              icon: Icon(
-                provider.isExist(widget.documentSnapshot)
-                    ? Iconsax.heart5
-                    : Iconsax.heart,
-                color: provider.isExist(widget.documentSnapshot)
-                    ? Colors.red
-                    : Colors.black,
-                size: 20,
-              ),
-            ),
-          ],
-        ),
-      ),
-
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      floatingActionButton: startCookingAndFavoriteButton(provider),
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             Stack(
+            Stack(
               children: [
                 // for image
-                Positioned(
-                  child: Hero(
-                    tag: widget.documentSnapshot["image"],
-                    child: Container(
-                      height: MediaQuery.of(context).size.height / 2.1,
-                      decoration: BoxDecoration(
-                        image: DecorationImage(
-                          image: NetworkImage(widget.documentSnapshot["image"]),
-                          fit: BoxFit.cover,
+                Hero(
+                  tag: widget.documentSnapshot['image'],
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 2.1,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        fit: BoxFit.cover,
+                        image: NetworkImage(
+                          widget.documentSnapshot['image'],
                         ),
                       ),
                     ),
                   ),
                 ),
-                // back button
+                // for back button
                 Positioned(
                   top: 40,
                   left: 10,
@@ -121,16 +65,15 @@ void initState() {
                   child: Row(
                     children: [
                       MyIconButton(
-                        icon: Icons.arrow_back_ios_new,
-                        pressed: () {
-                          Navigator.pop(context);
-                        },
-                      ),
+                          icon: Icons.arrow_back_ios_new,
+                          pressed: () {
+                            Navigator.pop(context);
+                          }),
                       const Spacer(),
                       MyIconButton(
                         icon: Iconsax.notification,
                         pressed: () {},
-                      ),
+                      )
                     ],
                   ),
                 ),
@@ -149,7 +92,7 @@ void initState() {
                 ),
               ],
             ),
-            // Drag handle
+            // for drag handle
             Center(
               child: Container(
                 width: 40,
@@ -166,26 +109,25 @@ void initState() {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Recipe name
                   Text(
-                    widget.documentSnapshot["name"],
+                    widget.documentSnapshot['name'],
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 10),
-                  // Calories and time
                   Row(
                     children: [
                       const Icon(
-                        Icons.flash_on,
+                        Iconsax.flash_1,
                         size: 20,
                         color: Colors.grey,
                       ),
                       Text(
-                        "${widget.documentSnapshot["cal"]} Cal",
+                        "${widget.documentSnapshot['cal']} Cal",
                         style: const TextStyle(
+                          fontWeight: FontWeight.bold,
                           fontSize: 14,
                           color: Colors.grey,
                         ),
@@ -193,35 +135,37 @@ void initState() {
                       const Text(
                         " · ",
                         style: TextStyle(
+                          fontWeight: FontWeight.w900,
                           color: Colors.grey,
-                          fontWeight: FontWeight.bold,
                         ),
                       ),
                       const Icon(
-                        Icons.access_time,
+                        Iconsax.clock,
                         size: 20,
                         color: Colors.grey,
                       ),
+                      const SizedBox(width: 5),
                       Text(
-                        "${widget.documentSnapshot["time"]} Min",
+                        "${widget.documentSnapshot['time']} Min",
                         style: const TextStyle(
-                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
                           color: Colors.grey,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  // Rating
+                  // for rating
                   Row(
                     children: [
                       const Icon(
-                        Icons.star,
+                        Iconsax.star1,
                         color: Colors.amberAccent,
                       ),
                       const SizedBox(width: 5),
                       Text(
-                        widget.documentSnapshot["rate"].toString(),
+                        widget.documentSnapshot['rate'],
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                         ),
@@ -229,7 +173,7 @@ void initState() {
                       const Text("/5"),
                       const SizedBox(width: 5),
                       Text(
-                        "(${widget.documentSnapshot["reviews"]} Reviews)",
+                        "${widget.documentSnapshot['reviews'.toString()]} Reviews",
                         style: const TextStyle(
                           color: Colors.grey,
                         ),
@@ -237,14 +181,13 @@ void initState() {
                     ],
                   ),
                   const SizedBox(height: 20),
-                  // Ingredients title and quantity selector
                   Row(
                     children: [
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            "Ingredients",
+                            "Infredients",
                             style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
@@ -261,23 +204,23 @@ void initState() {
                         ],
                       ),
                       const Spacer(),
-                      NoOfQuantity(
-                        currentNumber: recipeProvider.currentNumber,
-                        onAdd: () => recipeProvider.increaseQuantity(),
-                        onRemove: () => recipeProvider.decreaseQuantity(),
-                      ),
+                      QuantityIncrementDecrement(
+                        currentNumber: quantityProvider.currentNumber,
+                        onAdd: () => quantityProvider.increaseQuantity(),
+                        onRemov: () => quantityProvider.decreaseQuanity(),
+                      )
                     ],
                   ),
-                  const SizedBox(height: 20),
-                  // Ingredients list
+                  const SizedBox(height: 10),
+                  // list of ingredients
                   Column(
                     children: [
                       Row(
                         children: [
-                          // Ingredient images
+                          // ingredients images
                           Column(
                             children: widget
-                                .documentSnapshot["ingredientsImage"]
+                                .documentSnapshot['ingredientsImage']
                                 .map<Widget>(
                                   (imageUrl) => Container(
                                     height: 60,
@@ -287,7 +230,9 @@ void initState() {
                                       borderRadius: BorderRadius.circular(20),
                                       image: DecorationImage(
                                         fit: BoxFit.cover,
-                                        image: NetworkImage(imageUrl),
+                                        image: NetworkImage(
+                                          imageUrl,
+                                        ),
                                       ),
                                     ),
                                   ),
@@ -295,48 +240,44 @@ void initState() {
                                 .toList(),
                           ),
                           const SizedBox(width: 20),
-                          // Ingredient names
+                          // ingredients name
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: widget.documentSnapshot["ingredientsName"]
-                                .map<Widget>(
-                                  (ingredient) => SizedBox(
-                                    height: 60,
-                                    child: Center(
-                                      child: Text(
-                                        ingredient,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey.shade400,
+                            children: widget.documentSnapshot['ingredientsName']
+                                .map<Widget>((ingredient) => SizedBox(
+                                      height: 60,
+                                      child: Center(
+                                        child: Text(
+                                          ingredient,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                )
+                                    ))
                                 .toList(),
                           ),
+                          // ingredient amount
                           const Spacer(),
-                          // Ingredient amounts (dynamically updated)
-                         Column(
-                            children: recipeProvider.updatedIngredientAmounts
-                                .map<Widget>(
-                                  (amount) => SizedBox(
-                                    height: 60,
-                                    child: Center(
-                                      child: Text(
-                                        "${amount}gm",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.grey.shade400,
+                          Column(
+                            children: quantityProvider.updateIngredientAmounts
+                                .map<Widget>((amount) => SizedBox(
+                                      height: 60,
+                                      child: Center(
+                                        child: Text(
+                                          "${amount}gm",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey.shade400,
+                                          ),
                                         ),
                                       ),
-                                    ),
-                                  ),
-                                )
+                                    ))
                                 .toList(),
                           ),
                         ],
-                      ),
+                      )
                     ],
                   ),
                   const SizedBox(height: 40),
@@ -345,6 +286,57 @@ void initState() {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  FloatingActionButton startCookingAndFavoriteButton(
+      FavoriteProvider provider) {
+    return FloatingActionButton.extended(
+      backgroundColor: Colors.transparent,
+      elevation: 0,
+      onPressed: () {},
+      label: Row(
+        children: [
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+                backgroundColor: kprimaryColor,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 100, vertical: 13),
+                foregroundColor: Colors.white),
+            onPressed: () {},
+            child: const Text(
+              "Start Cooking",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 17,
+              ),
+            ),
+          ),
+          const SizedBox(width: 10),
+          IconButton(
+            style: IconButton.styleFrom(
+              shape: CircleBorder(
+                side: BorderSide(
+                  color: Colors.grey.shade300,
+                  width: 2,
+                ),
+              ),
+            ),
+            onPressed: () {
+              provider.toggleFavorite(widget.documentSnapshot);
+            },
+            icon: Icon(
+              provider.isExist(widget.documentSnapshot)
+                  ? Iconsax.heart5
+                  : Iconsax.heart,
+              color: provider.isExist(widget.documentSnapshot)
+                  ? Colors.red
+                  : Colors.black,
+              size: 22,
+            ),
+          ),
+        ],
       ),
     );
   }

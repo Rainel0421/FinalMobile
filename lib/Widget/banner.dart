@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-
-import '../Utils/constants.dart';
-import '../Views/quick_foods_screen.dart';
+import 'package:flutter_complete_app/Utils/constants.dart';
 
 class BannerToExplore extends StatelessWidget {
-  const BannerToExplore({
-    super.key,
-  });
+  const BannerToExplore({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +16,8 @@ class BannerToExplore extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            top: 30,
-            left: 10,
+            top: 32,
+            left: 20,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -37,16 +33,13 @@ class BannerToExplore extends StatelessWidget {
                 const SizedBox(height: 10),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 33),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 33,
+                    ),
                     backgroundColor: Colors.white,
                     elevation: 0,
                   ),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const QuickFoodsScreen(),
-                    ),
-                  ),
+                  onPressed: () {},
                   child: const Text(
                     "Explore",
                     style: TextStyle(

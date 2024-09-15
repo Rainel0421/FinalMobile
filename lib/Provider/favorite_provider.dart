@@ -4,61 +4,60 @@ import 'package:provider/provider.dart';
 
 class FavoriteProvider extends ChangeNotifier {
   List<String> _favoriteIds = [];
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<String> get favorites => _favoriteIds;
 
   FavoriteProvider() {
-    _loadFavorites(); // Load favorites on provider initialization
+    loadFavorites();
   }
-
-  // Toggle favorite status
+  // toggle favorites states
   void toggleFavorite(DocumentSnapshot product) async {
     String productId = product.id;
-
     if (_favoriteIds.contains(productId)) {
       _favoriteIds.remove(productId);
-      await _removeFavorite(productId); // Remove from Firestore
+      await _removeFavorite(productId); // remove from favorite
     } else {
       _favoriteIds.add(productId);
-      await _addFavorite(productId); // Add to Firestore
+      await _addFavorite(productId); // add to favorite
     }
-
     notifyListeners();
   }
 
-  // Check if a product is favorited
-  bool isExist(DocumentSnapshot product) {
-    return _favoriteIds.contains(product.id);
+  // chek if a product is favorited
+  bool isExist(DocumentSnapshot prouct) {
+    return _favoriteIds.contains(prouct.id);
   }
 
-  // Add favorite to Firestore
+  // add favorites to firestore
   Future<void> _addFavorite(String productId) async {
     try {
-      await _firestore.collection('favorites').doc(productId).set({
-        'isFavorite': true, // Add item as favorite in Firestore
+      await _firestore.collection("userFavorite").doc(productId).set({
+        'isFavorite':
+            true, // create the userFavorite collection and add item as favorites inf firestore
       });
     } catch (e) {
-      print('Error adding favorite: $e');
+      print(e.toString());
     }
   }
 
-  // Remove favorite from Firestore
+  // Remove favorite from firestore
   Future<void> _removeFavorite(String productId) async {
     try {
-      await _firestore.collection('favorites').doc(productId).delete();
+      await _firestore.collection("userFavorite").doc(productId).delete();
     } catch (e) {
-      print('Error removing favorite: $e');
+      print(e.toString());
     }
   }
 
-  // Load favorites from Firestore
-  Future<void> _loadFavorites() async {
+  // load favories from firestore (store favorite or not)
+  Future<void> loadFavorites() async {
     try {
-      QuerySnapshot snapshot = await _firestore.collection('favorites').get();
+      QuerySnapshot snapshot =
+          await _firestore.collection("userFavorite").get();
       _favoriteIds = snapshot.docs.map((doc) => doc.id).toList();
     } catch (e) {
-      print('Error loading favorites: $e');
+      print(e.toString());
     }
     notifyListeners();
   }

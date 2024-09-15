@@ -1,27 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_app/Provider/favorite_provider.dart';
+import 'package:flutter_complete_app/Views/recipe_detail_screen.dart';
 import 'package:iconsax/iconsax.dart';
-import '../Provider/favorite_provider.dart';
-import '../Views/recipe_screen.dart';
+
 class FoodItemsDisplay extends StatelessWidget {
   final DocumentSnapshot<Object?> documentSnapshot;
-
-  const FoodItemsDisplay({
-    super.key,
-    required this.documentSnapshot,
-  });
+  const FoodItemsDisplay({super.key, required this.documentSnapshot});
 
   @override
   Widget build(BuildContext context) {
     final provider = FavoriteProvider.of(context);
     return GestureDetector(
       onTap: () {
-        // Navigate to recipe details screen
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) =>
-                RecipeScreen(documentSnapshot: documentSnapshot),
+                RecipeDetailScreen(documentSnapshot: documentSnapshot),
           ),
         );
       },
@@ -41,16 +37,17 @@ class FoodItemsDisplay extends StatelessWidget {
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(15),
                       image: DecorationImage(
-                        image: NetworkImage(documentSnapshot[
-                            'image']), // Fetch image from Firestore
                         fit: BoxFit.cover,
+                        image: NetworkImage(
+                          documentSnapshot['image'], // image from firestore
+                        ),
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
-                  documentSnapshot['name'], // Fetch name from Firestore
+                  documentSnapshot['name'],
                   style: const TextStyle(
                     fontSize: 17,
                     fontWeight: FontWeight.bold,
@@ -58,7 +55,6 @@ class FoodItemsDisplay extends StatelessWidget {
                 ),
                 const SizedBox(height: 5),
                 Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const Icon(
                       Iconsax.flash_1,
@@ -66,7 +62,7 @@ class FoodItemsDisplay extends StatelessWidget {
                       color: Colors.grey,
                     ),
                     Text(
-                      "${documentSnapshot['cal']} Cal", // Fetch calories from Firestore
+                      "${documentSnapshot['cal']} Cal",
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
@@ -76,8 +72,8 @@ class FoodItemsDisplay extends StatelessWidget {
                     const Text(
                       " · ",
                       style: TextStyle(
-                        color: Colors.grey,
                         fontWeight: FontWeight.w900,
+                        color: Colors.grey,
                       ),
                     ),
                     const Icon(
@@ -85,19 +81,21 @@ class FoodItemsDisplay extends StatelessWidget {
                       size: 16,
                       color: Colors.grey,
                     ),
+                    const SizedBox(width: 5),
                     Text(
-                      "${documentSnapshot['time']} Min", // Fetch time from Firestore
+                      "${documentSnapshot['time']} Min",
                       style: const TextStyle(
-                        fontSize: 12,
                         fontWeight: FontWeight.bold,
+                        fontSize: 12,
                         color: Colors.grey,
                       ),
                     ),
                   ],
-                ),
+                )
               ],
             ),
-            // Favorite button
+            // for favorite button
+            // now let's whok on favorite button using provider
             Positioned(
               top: 5,
               right: 5,
@@ -106,8 +104,7 @@ class FoodItemsDisplay extends StatelessWidget {
                 backgroundColor: Colors.white,
                 child: InkWell(
                   onTap: () {
-                    provider.toggleFavorite(
-                        documentSnapshot); // Toggle favorite in Firestore
+                    provider.toggleFavorite(documentSnapshot);
                   },
                   child: Icon(
                     provider.isExist(documentSnapshot)
@@ -121,6 +118,7 @@ class FoodItemsDisplay extends StatelessWidget {
                 ),
               ),
             ),
+            // lets design a favorite screen
           ],
         ),
       ),

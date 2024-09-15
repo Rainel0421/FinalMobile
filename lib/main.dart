@@ -1,8 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_app/Provider/favorite_provider.dart';
+import 'package:flutter_complete_app/Provider/quantity.dart';
 import 'package:provider/provider.dart';
-import 'Provider/favorite_provider.dart';
-import 'Provider/quantity.dart';
 import 'Views/app_main_screen.dart';
 
 void main() async {
@@ -17,10 +17,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        // for favorite
-        ChangeNotifierProvider(create: (_) => FavoriteProvider()),
-         ChangeNotifierProvider(create: (_) => RecipeProvider()),
+      providers: [ 
+        // for favorite provider
+        ChangeNotifierProvider(create: (_)=>FavoriteProvider()),
+        // for quantity provider
+         ChangeNotifierProvider(create: (_) => QuantityProvider()),
       ],
       child: const MaterialApp(
         debugShowCheckedModeBanner: false,

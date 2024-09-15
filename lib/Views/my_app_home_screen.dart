@@ -1,11 +1,11 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_complete_app/Utils/constants.dart';
+import 'package:flutter_complete_app/Views/view_all_items.dart';
+import 'package:flutter_complete_app/Widget/banner.dart';
+import 'package:flutter_complete_app/Widget/food_items_display.dart';
+import 'package:flutter_complete_app/Widget/my_icon_button.dart';
 import 'package:iconsax/iconsax.dart';
-import '../Utils/constants.dart';
-import '../widgets/banner.dart';
-import '../widgets/food_items.dart';
-import '../widgets/my_icon_button.dart';
-import 'quick_foods_screen.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MyAppHomeScreen extends StatefulWidget {
   const MyAppHomeScreen({super.key});
@@ -16,16 +16,19 @@ class MyAppHomeScreen extends StatefulWidget {
 
 class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
   String category = "All";
+  // for category
   final CollectionReference categoriesItems =
       FirebaseFirestore.instance.collection("App-Category");
-  Query get filteredRecpes => FirebaseFirestore.instance
-      .collection("Complete-Flutter-App")
-      .where("category", isEqualTo: category); // firebase collection name
-
+  // for all itesm display
+  Query get fileteredRecipes =>
+      FirebaseFirestore.instance.collection("Complete-Flutter-App").where(
+            'category',
+            isEqualTo: category,
+          );
   Query get allRecipes =>
       FirebaseFirestore.instance.collection("Complete-Flutter-App");
-
-  Query get selectedRecipes => category == "All" ? allRecipes : filteredRecpes;
+  Query get selectedRecipes =>
+      category == "All" ? allRecipes : fileteredRecipes;
 
   @override
   Widget build(BuildContext context) {
@@ -36,54 +39,20 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              const SizedBox(height: 10),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        const Text(
-                          "What are you\ncooking today?",
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            height: 1,
-                          ),
-                        ),
-                        const Spacer(),
-                        MyIconButton(
-                          icon: Iconsax.notification,
-                          pressed: () {},
-                        )
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 22),
-                      child: TextField(
-                        decoration: InputDecoration(
-                          filled: true,
-                          prefixIcon: const Icon(Iconsax.search_normal),
-                          fillColor: Colors.white,
-                          border: InputBorder.none,
-                          hintText: "Search any recipes",
-                          hintStyle: const TextStyle(
-                            color: Colors.grey,
-                          ),
-                          enabledBorder: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: UnderlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            borderSide: BorderSide.none,
-                          ),
-                          contentPadding: const EdgeInsets.all(12),
-                        ),
-                      ),
-                    ),
+                    headerParts(),
+                    mySearchBar(),
+                    // for banner
                     const BannerToExplore(),
                     const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
+                      padding: EdgeInsets.symmetric(
+                        vertical: 20,
+                      ),
                       child: Text(
                         "Categories",
                         style: TextStyle(
@@ -92,26 +61,29 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                         ),
                       ),
                     ),
-                    selectedCategoryItems(),
-                    const SizedBox(height: 20),
+                    // for category
+                    selectedCategory(),
+                    const SizedBox(height: 10),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         const Text(
-                          "Quick &  Easy",
+                          "Quick & Easy",
                           style: TextStyle(
-                            letterSpacing: 0.1,
                             fontSize: 20,
+                            letterSpacing: 0.1,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
                         TextButton(
-                          onPressed: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const QuickFoodsScreen(),
-                            ),
-                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) => const ViewAllItems(),
+                              ),
+                            );
+                          },
                           child: const Text(
                             "View all",
                             style: TextStyle(
@@ -127,29 +99,28 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
               ),
               StreamBuilder(
                 stream: selectedRecipes.snapshots(),
-                builder: (context, AsyncSnapshot<QuerySnapshot> snapshots) {
-                  if (snapshots.hasData) {
+                builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+                  if (snapshot.hasData) {
                     final List<DocumentSnapshot> recipes =
-                        snapshots.data?.docs ?? [];
+                        snapshot.data?.docs ?? [];
                     return Padding(
                       padding: const EdgeInsets.only(top: 5, left: 15),
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: Row(
                           children: recipes
-                              .map((e) => FoodItemsDisplay(
-                                    documentSnapshot: e,
-                                  ))
+                              .map((e) => FoodItemsDisplay(documentSnapshot: e))
                               .toList(),
                         ),
                       ),
                     );
                   }
+                  // it means if snapshot has date then show the date otherwise show the progress bar
                   return const Center(
                     child: CircularProgressIndicator(),
                   );
                 },
-              ),
+              )
             ],
           ),
         ),
@@ -157,7 +128,7 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
     );
   }
 
-  StreamBuilder<QuerySnapshot<Object?>> selectedCategoryItems() {
+  StreamBuilder<QuerySnapshot<Object?>> selectedCategory() {
     return StreamBuilder(
       stream: categoriesItems.snapshots(),
       builder: (context, AsyncSnapshot<QuerySnapshot> streamSnapshot) {
@@ -172,18 +143,14 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
                     setState(() {
                       category = streamSnapshot.data!.docs[index]['name'];
                     });
-
-                    // setState(() {
-                    //   selectedIndex = index;
-                    // });
                   },
                   child: Container(
                     decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(25),
                       color:
                           category == streamSnapshot.data!.docs[index]['name']
                               ? kprimaryColor
                               : Colors.white,
-                      borderRadius: BorderRadius.circular(25),
                     ),
                     padding: const EdgeInsets.symmetric(
                       horizontal: 20,
@@ -206,10 +173,55 @@ class _MyAppHomeScreenState extends State<MyAppHomeScreen> {
             ),
           );
         }
+        // it means if snapshot has date then show the date otherwise show the progress bar
         return const Center(
           child: CircularProgressIndicator(),
         );
       },
+    );
+  }
+
+  Padding mySearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 22),
+      child: TextField(
+        decoration: InputDecoration(
+          filled: true,
+          prefixIcon: const Icon(Iconsax.search_normal),
+          fillColor: Colors.white,
+          border: InputBorder.none,
+          hintText: "Search any recipes",
+          hintStyle: const TextStyle(
+            color: Colors.grey,
+          ),
+          enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none),
+          focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10),
+              borderSide: BorderSide.none),
+        ),
+      ),
+    );
+  }
+
+  Row headerParts() {
+    return Row(
+      children: [
+        const Text(
+          "What are you\ncooking today?",
+          style: TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            height: 1,
+          ),
+        ),
+        const Spacer(),
+        MyIconButton(
+          icon: Iconsax.notification,
+          pressed: () {},
+        ),
+      ],
     );
   }
 }
