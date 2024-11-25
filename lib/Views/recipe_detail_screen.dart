@@ -43,16 +43,13 @@ class _RecipeDetailScreenState extends State<RecipeDetailScreen> {
             Stack(
               children: [
                 // for image
-                Hero(
-                  tag: widget.documentSnapshot['image'],
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 2.1,
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        fit: BoxFit.cover,
-                        image: NetworkImage(
-                          widget.documentSnapshot['image'],
-                        ),
+                Container(
+                  height: MediaQuery.of(context).size.height / 2.1,
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      fit: BoxFit.cover,
+                      image: NetworkImage(
+                        widget.documentSnapshot['image'],
                       ),
                     ),
                   ),
